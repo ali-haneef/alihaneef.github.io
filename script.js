@@ -1,6 +1,26 @@
 const menuToggle = document.querySelector('.menu-toggle');
 const siteNav = document.querySelector('.site-nav');
 
+const enhancementStyles = document.createElement('link');
+enhancementStyles.rel = 'stylesheet';
+enhancementStyles.href = 'enhancements.css';
+document.head.append(enhancementStyles);
+const typographyOverrides = document.createElement('style');
+typographyOverrides.textContent = 'h1 em,h2 em{font-family:inherit;font-style:normal;font-weight:500;color:var(--lime);letter-spacing:-.08em}.hero h1,.section-heading h2,.about h2,.contact h2{font-weight:700}';
+document.head.append(typographyOverrides);
+
+const scrollProgress = document.createElement('div');
+scrollProgress.className = 'scroll-progress';
+document.body.prepend(scrollProgress);
+
+const updateScrollState = () => {
+  const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress.style.width = `${scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0}%`;
+  document.querySelector('.site-header')?.classList.toggle('scrolled', window.scrollY > 20);
+};
+window.addEventListener('scroll', updateScrollState, { passive: true });
+updateScrollState();
+
 menuToggle?.addEventListener('click', () => {
   const isOpen = siteNav.classList.toggle('open');
   menuToggle.setAttribute('aria-expanded', isOpen);
@@ -38,3 +58,21 @@ document.querySelector('.project-grid')?.append(liveCard);
 const maverickArt = liveCard.querySelector('.maverick-art');
 Object.assign(maverickArt.style, { background: '#d6e0d9', color: '#14231d', padding: '25px' });
 Object.assign(liveCard.querySelector('.maverick-panel').style, { position: 'absolute', left: '25px', right: '25px', bottom: '30px', background: '#1d382c', color: '#e9f5e7', padding: '22px' });
+
+const animatedElements = document.querySelectorAll('.project-card, .timeline-item, .about, .skills, .experience, .contact');
+animatedElements.forEach((element) => element.classList.add('reveal-section'));
+const revealObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('is-visible');
+    observer.unobserve(entry.target);
+  });
+}, { threshold: 0.12 });
+animatedElements.forEach((element) => revealObserver.observe(element));
+
+document.querySelectorAll('.site-nav a').forEach((link) => {
+  link.addEventListener('click', () => {
+    document.querySelectorAll('.site-nav a').forEach((item) => item.classList.remove('active'));
+    link.classList.add('active');
+  });
+});
